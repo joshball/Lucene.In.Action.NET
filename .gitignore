@@ -172,5 +172,14 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# Project Specific Stuff
+
+# Lucene 2 action sample code (in java)
 vendor/lia2e/
+
+# lucene indexes
+segments.gen
+segements_*
+write.lock
 chapters/01/index/
