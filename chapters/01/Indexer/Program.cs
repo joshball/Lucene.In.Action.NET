@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using Lucene.Net;
+using LuceneHelpers;
 
 namespace Indexer
 {
@@ -32,8 +34,9 @@ namespace Indexer
 
             try
             {
-                var indexer = new Indexer(indexDir);
-                var numFilesIndexed = indexer.Index(dataDir);
+                var tester = new LuceneFileDirectoryTester(indexDir);
+                var filenames = Directory.GetFiles(dataDir, "*.txt").Select(Path.GetFullPath).ToList();
+                var numFilesIndexed = tester.IndexDataFiles(filenames, true);
                 stopwatch.Stop();
                 Console.WriteLine("Indexing {0} files took {1} ms.", numFilesIndexed, stopwatch.Elapsed);
             }

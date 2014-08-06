@@ -31,6 +31,7 @@ namespace Indexer
                     var doc = CreateDocument(file);
                     writer.AddDocument(doc);
                 }
+                writer.Commit();;
             }
             return files.Length;
         }
