@@ -48,11 +48,16 @@
     <Reference Include="xunit.core">
       <HintPath>..\..\packages\xunit.core.2.0.0-beta-build2700\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid\xunit.core.dll</HintPath>
     </Reference>
+    <Reference Include="xunit.runner.utility, Version=2.0.0.2700, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\xunit.runner.utility.2.0.0-beta-build2700\lib\net35\xunit.runner.utility.dll</HintPath>
+    </Reference>
     <Reference Include="xunit.runner.visualstudio.testadapter">
       <HintPath>..\..\packages\xunit.runner.visualstudio.0.99.7-build1002\lib\xunit.runner.visualstudio.testadapter.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CityData.cs" />
     <Compile Include="IndexingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -63,6 +68,10 @@
     <ProjectReference Include="..\..\..\vendor\lucene.net\src\core\Lucene.Net.csproj">
       <Project>{5d4ad9be-1ffb-41ab-9943-25737971bf57}</Project>
       <Name>Lucene.Net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\LuceneHelpers\LuceneHelpers.csproj">
+      <Project>{a70edb7f-2973-4250-81a1-682c4647f3fd}</Project>
+      <Name>LuceneHelpers</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

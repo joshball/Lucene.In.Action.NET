@@ -1,51 +1,71 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Store;
+using LuceneHelpers;
 using Xunit;
 
 namespace IndexingTests
 {
-    public class CityData
+    public class TestIndex
     {
-        public string Id { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-        public string Notes { get; set; }
+        public readonly Analyzer Analyzer;
+        public readonly Directory Directory;
 
-        public CityData()
+        public List<CityData> CityData = new List<CityData>
         {
+            new CityData("1", "Netherlands", "Amsterdam", "Amsterdam has lots of bridges"),
+            new CityData("2", "Italy", "Venice", "Venice has lots of canals")
+        };
+
+        public IndexReader IndexReaderInstance
+        {
+            get
+            {
+                return IndexReader.Open(Directory, true);
+            }
+        }
+        public IndexWriter IndexWriterInstance
+        {
+            get
+            {
+                var indexWriter = new IndexWriter(Directory, Analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
+
+                foreach (CityData data in CityData)
+                {
+                    var doc = new Document();
+                    doc.Add(new Field("id", data.Id, Field.Store.YES, Field.Index.NOT_ANALYZED));
+                    doc.Add(new Field("country", data.Country, Field.Store.YES, Field.Index.NO));
+                    doc.Add(new Field("contents", data.Notes, Field.Store.NO, Field.Index.ANALYZED));
+                    doc.Add(new Field("city", data.City, Field.Store.YES, Field.Index.ANALYZED));
+                    indexWriter.AddDocument(doc);
+                }
+                indexWriter.Commit();
+                return indexWriter;
+            }
+        }
+        
+        public TestIndex()
+        {
+            Directory = new RAMDirectory();
+            Analyzer = new WhitespaceAnalyzer();
         }
 
-        public CityData(string id, string city, string country, string notes)
-        {
-            Id = id;
-            City = city;
-            Country = country;
-            Notes = notes;
-        }
     }
 
     public class IndexingTests
     {
-        protected List<CityData> CityData = new List<CityData>
+        public List<CityData> CityData = new List<CityData>
         {
             new CityData("1", "Netherlands", "Amsterdam", "Amsterdam has lots of bridges"),
-            new CityData("1", "Italy", "Venice", "Venice has lots of canals")
+            new CityData("2", "Italy", "Venice", "Venice has lots of canals")
         };
-        private readonly Directory _directory;
 
-        public IndexingTests()
+        public int AddCityData(IndexWriter indexWriter)
         {
-            this._directory = new RAMDirectory();
-            var indexWriter = GetIndexWriter();
-            foreach (var data in CityData)
+            foreach (CityData data in CityData)
             {
                 var doc = new Document();
                 doc.Add(new Field("id", data.Id, Field.Store.YES, Field.Index.NOT_ANALYZED));
@@ -54,20 +74,49 @@ namespace IndexingTests
                 doc.Add(new Field("city", data.City, Field.Store.YES, Field.Index.ANALYZED));
                 indexWriter.AddDocument(doc);
             }
-            indexWriter.Dispose();
-        }
-
-        private IndexWriter GetIndexWriter() 
-        {
-            return new IndexWriter(_directory, new WhitespaceAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED);
+            indexWriter.Commit();
+            return CityData.Count;            
         }
 
         [Fact]
         public void IndexWriterHasCorrectNumberOfDocs()
         {
-            var indexWriter = GetIndexWriter();
-            Assert.Equal(CityData.Count, indexWriter.NumDocs());
+            var tester = new LuceneMemoryTester();
+            Assert.Equal(2, tester.Index(AddCityData, true));
+            using (var indexWriter = tester.GetIndexWriter(false))
+            {
+                Assert.Equal(CityData.Count, indexWriter.NumDocs());
+                Assert.Equal(CityData.Count, indexWriter.MaxDoc());
+            }
+        }
 
+        [Fact]
+        public void IndexReaderHasTheCorrectNumberOfDocs()
+        {
+            var tester = new LuceneMemoryTester();
+            Assert.Equal(2, tester.Index(AddCityData, true));
+            using (var indexReader = tester.GetIndexReader())
+            {
+                Assert.Equal(CityData.Count, indexReader.NumDocs());
+                Assert.Equal(CityData.Count, indexReader.MaxDoc);
+            }
+        }
+        
+  
+        [Fact]
+        public void IndexWriterCorrectlyDeletesDocumentsByTermId()
+        {
+            var tester = new LuceneMemoryTester();
+            Assert.Equal(2, tester.Index(AddCityData, true));
+            using (var indexWriter = tester.GetIndexWriter(false))
+            {
+                Assert.Equal(CityData.Count, indexWriter.NumDocs());
+                Assert.Equal(CityData.Count, indexWriter.MaxDoc());
+                indexWriter.DeleteDocuments(new Term("id", "1"));
+                indexWriter.Commit();
+                Assert.Equal(2, indexWriter.MaxDoc());
+                Assert.Equal(1, indexWriter.NumDocs());
+            }
         }
     }
 }
