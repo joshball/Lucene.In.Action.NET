@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lucene.Net.Analysis.Standard;
 using LuceneHelpers;
 
 namespace IndexDump
@@ -22,8 +23,10 @@ namespace IndexDump
             Console.WriteLine("Directory for new Lucene index: [{0}]", indexDir);
             try
             {
-                var indexer = new LuceneFileDirectoryTester(indexDir);
-                indexer.CheckIndex();
+                var version = Lucene.Net.Util.Version.LUCENE_30;
+                var analyzer = new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30);
+                var tester = new LuceneFileDirectoryTester(indexDir, analyzer, version);
+                tester.CheckIndex();
             }
             catch (Exception e)
             {

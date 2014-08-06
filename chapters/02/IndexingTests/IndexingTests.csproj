@@ -59,6 +59,8 @@
   <ItemGroup>
     <Compile Include="CityData.cs" />
     <Compile Include="IndexingTests.cs" />
+    <Compile Include="IndexLockingTests.cs" />
+    <Compile Include="LuceneCitiesFixtureData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

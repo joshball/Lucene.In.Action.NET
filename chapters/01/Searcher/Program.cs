@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using LuceneHelpers;
 using Directory = System.IO.Directory;
@@ -29,7 +30,9 @@ namespace Searcher
 
             try
             {
-                var tester = new LuceneFileDirectoryTester(indexDir);
+                var version = Lucene.Net.Util.Version.LUCENE_30;
+                var analyzer = new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30);
+                var tester = new LuceneFileDirectoryTester(indexDir, analyzer, version);
                 var hits = tester.Search(query);
                 stopwatch.Stop();
                 Console.WriteLine("Search.hits.MaxScore: {0}", hits.MaxScore);

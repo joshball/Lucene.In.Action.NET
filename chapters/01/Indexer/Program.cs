@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using Lucene.Net;
+using Lucene.Net.Analysis.Standard;
 using LuceneHelpers;
 
 namespace Indexer
@@ -34,7 +35,9 @@ namespace Indexer
 
             try
             {
-                var tester = new LuceneFileDirectoryTester(indexDir);
+                var version = Lucene.Net.Util.Version.LUCENE_30;
+                var analyzer = new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30);
+                var tester = new LuceneFileDirectoryTester(indexDir, analyzer, version);
                 var filenames = Directory.GetFiles(dataDir, "*.txt").Select(Path.GetFullPath).ToList();
                 var numFilesIndexed = tester.IndexDataFiles(filenames, true);
                 stopwatch.Stop();
