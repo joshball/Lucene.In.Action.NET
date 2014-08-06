@@ -22,9 +22,10 @@ namespace LuceneHelpers
         public LuceneDirectory IndexDirectory { get; set; }
         public LuceneVersion CurrentLuceneVersion { get; set; }
 
-        public LuceneBase(LuceneDirectory directory)
+        public LuceneBase(LuceneDirectory directory, Analyzer analyzer, LuceneVersion version)
         {
-            Analyzer = new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30);
+            Analyzer = analyzer;
+            CurrentLuceneVersion = version;
             IndexDirectory = directory;
         }
 
@@ -32,9 +33,17 @@ namespace LuceneHelpers
         {
             return new IndexWriter(IndexDirectory, Analyzer, createNewIndex, IndexWriter.MaxFieldLength.UNLIMITED);
         }
+        public IndexWriter GetIndexWriter(bool createNewIndex, IndexWriter.MaxFieldLength maxFieldLength)
+        {
+            return new IndexWriter(IndexDirectory, Analyzer, createNewIndex, maxFieldLength);
+        }
         public IndexReader GetIndexReader()
         {
             return IndexReader.Open(IndexDirectory, true);
+        }
+        public IndexSearcher GetIndexSearcher()
+        {
+            return new IndexSearcher(IndexDirectory, true);
         }
 
         public int Index(Func<IndexWriter, int> indexWriterAction, bool createNewIndex)
@@ -51,6 +60,7 @@ namespace LuceneHelpers
         {
             using (var writer = new IndexWriter(IndexDirectory, Analyzer, createNewIndex, IndexWriter.MaxFieldLength.UNLIMITED))
             {
+                writer.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
                 foreach (var file in filenames)
                 {
                     Console.WriteLine("Indexing file: {0}", file);
@@ -74,11 +84,21 @@ namespace LuceneHelpers
 
         public TopDocs Search(string queryString)
         {
-            var parser = new QueryParser(CurrentLuceneVersion, "contents", Analyzer);
-            var query = parser.Parse(queryString);
             using (var searcher = new IndexSearcher(IndexDirectory))
             {
-                return searcher.Search(query,10);
+                var parser = new QueryParser(CurrentLuceneVersion, "contents", Analyzer);
+                var query = parser.Parse(queryString);
+                return searcher.Search(query, 10);
+            }
+        }
+
+        public TopDocs SearchFieldTerm(string fieldName, string searchString)
+        {
+            using (var searcher = new IndexSearcher(IndexDirectory))
+            {
+                var term = new Term(fieldName, searchString);
+                var query = new TermQuery(term);
+                return searcher.Search(query, 10);
             }
         }
 
