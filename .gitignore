@@ -180,6 +180,6 @@ vendor/lia2e/
 
 # lucene indexes
 segments.gen
-segements_*
+segments_*
+*.cfs
 write.lock
-chapters/01/index/
