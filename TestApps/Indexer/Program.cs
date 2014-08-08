@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -9,6 +8,8 @@ using System.Timers;
 using Lucene.Net;
 using Lucene.Net.Analysis.Standard;
 using LuceneHelpers;
+using LuceneHelpers.Generators;
+using LuceneVersion = Lucene.Net.Util.Version;
 
 namespace Indexer
 {
@@ -28,18 +29,18 @@ namespace Indexer
             var indexDir = args[0];
             var dataDir = args[1];
             Console.WriteLine("Directory for new Lucene index: [{0}]", indexDir);
-            Console.WriteLine("Directory with .txt files to index: [{0}]", indexDir);
+            Console.WriteLine("Directory with data files to index: [{0}]", dataDir);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             try
             {
-                var version = Lucene.Net.Util.Version.LUCENE_30;
+                const LuceneVersion version = LuceneVersion.LUCENE_30;
                 var analyzer = new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30);
                 var tester = new LuceneFileDirectoryTester(indexDir, analyzer, version);
-                var filenames = Directory.GetFiles(dataDir, "*.txt").Select(Path.GetFullPath).ToList();
-                var numFilesIndexed = tester.IndexDataFiles(filenames, true);
+                var docGen = new LuceneTestTextFileDocumentGenerator(dataDir);
+                var numFilesIndexed = tester.IndexDataFiles(docGen, true);
                 stopwatch.Stop();
                 Console.WriteLine("Indexing {0} files took {1} ms.", numFilesIndexed, stopwatch.Elapsed);
             }
