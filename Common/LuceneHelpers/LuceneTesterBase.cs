@@ -14,30 +14,45 @@ using LuceneDirectory = Lucene.Net.Store.Directory;
 using SystemDirectory = System.IO.Directory;
 using LuceneVersion = Lucene.Net.Util.Version;
 using LuceneAnalyzer = Lucene.Net.Analysis.Analyzer;
+using LuceneDocument = Lucene.Net.Documents.Document;
 
 namespace LuceneHelpers
 {
-    public class LuceneBase
+    public interface ILuceneDocumentGenerator
     {
+        IEnumerable<LuceneDocument> LuceneDocuments();
+    }
+
+    public class LuceneTesterBase
+    {
+        public bool Debug { get; set; }
         public LuceneAnalyzer Analyzer { get; set; }
         public LuceneDirectory IndexDirectory { get; set; }
         public LuceneVersion CurrentLuceneVersion { get; set; }
 
-        public LuceneBase(LuceneDirectory directory, LuceneAnalyzer analyzer, LuceneVersion version)
+        public LuceneTesterBase(LuceneDirectory directory, LuceneAnalyzer analyzer, LuceneVersion version)
         {
             Analyzer = analyzer;
             CurrentLuceneVersion = version;
             IndexDirectory = directory;
+            Debug = false;
+        }
+
+        public IndexWriter GetIndexWriter(bool createNewIndex, IndexWriter.MaxFieldLength maxFieldLength)
+        {
+            var indexWriter = new IndexWriter(IndexDirectory, Analyzer, createNewIndex, maxFieldLength);
+            if (Debug)
+            {
+                indexWriter.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
+            }
+            return indexWriter;
         }
 
         public IndexWriter GetIndexWriter(bool createNewIndex)
         {
-            return new IndexWriter(IndexDirectory, Analyzer, createNewIndex, IndexWriter.MaxFieldLength.UNLIMITED);
+            return GetIndexWriter(createNewIndex, IndexWriter.MaxFieldLength.UNLIMITED);
         }
-        public IndexWriter GetIndexWriter(bool createNewIndex, IndexWriter.MaxFieldLength maxFieldLength)
-        {
-            return new IndexWriter(IndexDirectory, Analyzer, createNewIndex, maxFieldLength);
-        }
+
         public IndexReader GetIndexReader()
         {
             return IndexReader.Open(IndexDirectory, true);
@@ -57,29 +72,19 @@ namespace LuceneHelpers
             }
         }
 
-        public int IndexDataFiles(List<string> filenames, bool createNewIndex)
+        public int IndexDataFiles(ILuceneDocumentGenerator documentGenerator, bool createNewIndex)
         {
-            using (var writer = new IndexWriter(IndexDirectory, Analyzer, createNewIndex, IndexWriter.MaxFieldLength.UNLIMITED))
+            using (var writer = GetIndexWriter(createNewIndex))
             {
-                writer.SetInfoStream(new StreamWriter(Console.OpenStandardOutput()));
-                foreach (var file in filenames)
+                var numDocuments = 0;
+                foreach (var document in documentGenerator.LuceneDocuments())
                 {
-                    Console.WriteLine("Indexing file: {0}", file);
-                    var doc = CreateDocument(file);
-                    writer.AddDocument(doc);
+                    writer.AddDocument(document);
+                    numDocuments++;
                 }
                 writer.Commit();;
+                return numDocuments;
             }
-            return filenames.Count;
-        }
-
-        private Document CreateDocument(string fileName)
-        {
-            var doc = new Document();
-            doc.Add(new Field("contents", new StreamReader(fileName)));
-            doc.Add(new Field("filename", Path.GetFileName(fileName), Field.Store.YES, Field.Index.NOT_ANALYZED));
-            doc.Add(new Field("fullpath", fileName, Field.Store.YES, Field.Index.NOT_ANALYZED));
-            return doc;
         }
 
 

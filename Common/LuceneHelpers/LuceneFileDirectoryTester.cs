@@ -5,7 +5,7 @@ using LuceneAnalyzer = Lucene.Net.Analysis.Analyzer;
 
 namespace LuceneHelpers
 {
-    public class LuceneFileDirectoryTester : LuceneBase
+    public class LuceneFileDirectoryTester : LuceneTesterBase
     {
         public LuceneFileDirectoryTester(string indexDir, LuceneAnalyzer analyzer, LuceneVersion version)
             : base(FSDirectory.Open(indexDir), analyzer, version)
