@@ -16,7 +16,8 @@ namespace LuceneHelpers.Generators
         protected LuceneTestFileDocumentGeneratorBase(string fileDirectoryPath, string fileFilter)
         {
             FileDirectoryPath = fileDirectoryPath;
-            TestTextFiles = Directory.GetFiles(FileDirectoryPath, fileFilter, SearchOption.AllDirectories).Select(Path.GetFullPath).ToList();
+//            TestTextFiles = Directory.GetFiles(FileDirectoryPath, fileFilter, SearchOption.AllDirectories).Select(Path.GetFullPath).ToList();
+            TestTextFiles = Directory.GetFiles(FileDirectoryPath, fileFilter, SearchOption.AllDirectories).ToList();
             Debug = false;
         }
 
@@ -32,11 +33,11 @@ namespace LuceneHelpers.Generators
                 {
                     Console.WriteLine(" - Indexing file: {0}", file);
                 }
-                var luceneDocument = CreateDocument(file);
+                var luceneDocument = CreateDocument(file, FileDirectoryPath);
                 yield return luceneDocument;
             }
         }
 
-        protected abstract Document CreateDocument(string fileName);
+        protected abstract Document CreateDocument(string fileName, string dataRootDirectory);
     }
 }

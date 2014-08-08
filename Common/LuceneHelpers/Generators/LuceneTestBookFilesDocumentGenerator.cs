@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using Lucene.Net.Documents;
 
 namespace LuceneHelpers.Generators
@@ -45,15 +47,23 @@ namespace LuceneHelpers.Generators
 
     public class BookPropsParsed
     {
-        public BookPropsParsed(string fileName)
+        public BookPropsParsed(string fileName, string dataRootDirectory)
         {
             FileName = fileName;
             BookProps = new BookProps(fileName);
-
+            if (fileName.IndexOf(dataRootDirectory, System.StringComparison.Ordinal) != 0)
+            {
+                throw new Exception("Bad root path");
+            }
+            var relativePath = fileName.Substring(dataRootDirectory.Length);
+            var categories = String.Join("/", relativePath.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.None));
+            // category comes from relative path below the base directory
+//            String category = file.getParent().substring(rootDir.length());    //1
+//            category = category.replace(File.separatorChar, '/');              //1
             ISBN = BookProps.ISBN;
             Title = BookProps.Title;
             Subject = BookProps.Subject;
-            Category = BookProps.Category;
+            Category = categories;
             Url = BookProps.Url;
             Authors = BookProps.Authors.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
             ParsePubMonth();
@@ -114,11 +124,11 @@ namespace LuceneHelpers.Generators
         }
 
 
-        protected override Document CreateDocument(string fileName)
+        protected override Document CreateDocument(string fileName, string dataRootDirectory)
         {
             Console.WriteLine("CreateDocument: {0}", fileName);
 
-            var pbp = new BookPropsParsed(fileName);
+            var pbp = new BookPropsParsed(fileName, dataRootDirectory);
 
             var doc = new Document();
 

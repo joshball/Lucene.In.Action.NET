@@ -9,7 +9,7 @@ namespace LuceneHelpers.Generators
         {
         }
 
-        protected override Document CreateDocument(string fileName)
+        protected override Document CreateDocument(string fileName, string dataRootDirectory)
         {
             var doc = new Document();
             doc.Add(new Field("contents", new StreamReader(fileName)));
