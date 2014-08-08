@@ -1465,7 +1465,6 @@ namespace Lucene.Net.QueryParsers
                 System.String error_after = null;
                 bool EOFSeen = false;
 
-                bool read = false;
                 try
                 {
                     var nextChar = input_stream.ReadChar();
