@@ -17,14 +17,19 @@ namespace ChapterTests._03
         [Fact]
         public void TestSlopComparisons()
         {
-            using (var dir = FSDirectory.Open(TestEnvironment.TestIndexDirectory))
-            using (var indexSearcher = new IndexSearcher(dir))
-            {
-                var phrases = new [] {"quick", "fox"};
+            var phrases = new[] { "quick", "fox" };
 
-                Assert.False(PhaseQueryHasHits(phrases, 0), "Exact phrase not found");
-                Assert.True(PhaseQueryHasHits(phrases, 1), "Close enough");
-            }
+            Assert.False(PhaseQueryHasHits(phrases, 0), "Exact phrase not found");
+            Assert.True(PhaseQueryHasHits(phrases, 1), "Close enough");
+        }
+
+        [Fact]
+        public void TestReverseComparisons()
+        {
+            var phrases = new[] { "fox", "quick" };
+
+            Assert.False(PhaseQueryHasHits(phrases, 2), "Hop flop");
+            Assert.True(PhaseQueryHasHits(phrases, 3), "Hop hop slop");
         }
 
         protected bool PhaseQueryHasHits(string[] phrases, int i)
