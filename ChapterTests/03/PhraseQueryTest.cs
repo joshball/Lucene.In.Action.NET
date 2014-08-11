@@ -32,6 +32,16 @@ namespace ChapterTests._03
             Assert.True(PhaseQueryHasHits(phrases, 3), "Hop hop slop");
         }
 
+        [Fact]
+        public void TestMultipleComparisons()
+        {
+            Assert.False(PhaseQueryHasHits(new[] { "quick", "jumped", "lazy" }, 3), "Not close enough");
+            Assert.True(PhaseQueryHasHits(new[] { "quick", "jumped", "lazy" }, 4), "Just enough");
+
+            Assert.False(PhaseQueryHasHits(new[] { "lazy", "jumped", "quick" }, 7), "Almost but not quite");
+            Assert.True(PhaseQueryHasHits(new[] { "lazy", "jumped", "quick" }, 8), "Bingo");
+        }
+
         protected bool PhaseQueryHasHits(string[] phrases, int i)
         {
             using (var dir = FSDirectory.Open(TestEnvironment.TestIndexDirectory))
