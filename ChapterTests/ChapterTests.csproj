@@ -69,6 +69,7 @@
     <Compile Include="03\NumericRangeQueryTest.cs" />
     <Compile Include="03\PhraseQueryTest.cs" />
     <Compile Include="03\PrefixQueryTest.cs" />
+    <Compile Include="03\QueryParserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
