@@ -1,6 +1,9 @@
 using System;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
 using Lucene.Net.Search;
+using Lucene.Net.Store;
 using LuceneHelpers;
 
 namespace ChapterTests._03
@@ -24,6 +27,21 @@ namespace ChapterTests._03
                 var title = document.Get("title");
                 var subject = document.Get("subject");
                 Console.WriteLine("Document: {0} title: {1} || subject: {2}", result.Doc, title, subject);
+            }
+        }
+
+        protected void IndexSingleFieldDocs(Field[] fields)
+        {
+            using (var dir = new RAMDirectory())
+            using (var indexWriter = new IndexWriter(dir, new WhitespaceAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED))
+            {
+                foreach (var field in fields)
+                {
+                    var doc = new Document();
+                    doc.Add(field);
+                    indexWriter.AddDocument(doc);
+                }
+                indexWriter.Optimize();
             }
         }
     }
