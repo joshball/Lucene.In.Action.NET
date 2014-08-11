@@ -44,13 +44,8 @@ namespace ChapterTests._03
             using (var dir = FSDirectory.Open(TestEnvironment.TestIndexDirectory))
             using (var indexSearcher = new IndexSearcher(dir))
             {
-                var prgrammingBooks = new TermQuery(new Term("category", "/technology/computers/programming"));
                 var methodologyBooks =  new TermQuery( new Term("category", "/technology/computers/programming/methodology"));
                 var easternPhilosophyBooks = new TermQuery( new Term("category", "/philosophy/eastern"));
-
-                var topDocsZero = indexSearcher.Search(prgrammingBooks, 10);
-                var topDocsOne = indexSearcher.Search(methodologyBooks, 10);
-                var topDocsTwo = indexSearcher.Search(easternPhilosophyBooks, 10);
 
 
                 var enlightenmentBooks = new BooleanQuery()
