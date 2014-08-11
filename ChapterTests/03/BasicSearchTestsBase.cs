@@ -3,8 +3,8 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
-using Lucene.Net.Store;
 using LuceneHelpers;
+using LuceneDirectory = Lucene.Net.Store.Directory;
 
 namespace ChapterTests._03
 {
@@ -30,10 +30,9 @@ namespace ChapterTests._03
             }
         }
 
-        protected void IndexSingleFieldDocs(Field[] fields)
+        protected void IndexSingleFieldDocs(LuceneDirectory directory, Field[] fields)
         {
-            using (var dir = new RAMDirectory())
-            using (var indexWriter = new IndexWriter(dir, new WhitespaceAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED))
+            using (var indexWriter = new IndexWriter(directory, new WhitespaceAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED))
             {
                 foreach (var field in fields)
                 {
