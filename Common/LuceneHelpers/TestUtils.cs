@@ -40,13 +40,15 @@ namespace LuceneHelpers
 
         public static bool HitsIncludeTitle(IndexSearcher searcher, TopDocs topDocs, String title)
         {
-            var found = topDocs
-                .ScoreDocs
-                .Select(scoreDoc => searcher.Doc(scoreDoc.Doc))
-                .Any(doc => title.Equals(doc.Get("title")));
-            if(found)
+            foreach (var scoreDoc in topDocs.ScoreDocs)
             {
-                return true;
+                var doc = searcher.Doc(scoreDoc.Doc);
+                var docTitle = doc.Get("title");
+                var decodedTitle = DecodeEncodedNonAsciiCharacters(docTitle);
+                if (decodedTitle.Equals(title))
+                {
+                    return true;
+                }
             }
             Console.WriteLine("title '" + title + "' not found");
             return false;
