@@ -56,7 +56,9 @@ namespace LuceneHelpers.Generators
                 throw new Exception("Bad root path");
             }
             var relativePath = fileName.Substring(dataRootDirectory.Length);
-            var categories = String.Join("/", relativePath.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.None));
+            var split = relativePath.Split(new[] {Path.DirectorySeparatorChar}, StringSplitOptions.None).ToList();
+            split.RemoveAt(split.Count-1);
+            var categories = String.Join("/", split);
             // category comes from relative path below the base directory
 //            String category = file.getParent().substring(rootDir.length());    //1
 //            category = category.replace(File.separatorChar, '/');              //1
