@@ -37,5 +37,36 @@ namespace ChapterTests._03
             }
 
         }
+
+        [Fact]
+        public void TestBooleanOr()
+        {
+            using (var dir = FSDirectory.Open(TestEnvironment.TestIndexDirectory))
+            using (var indexSearcher = new IndexSearcher(dir))
+            {
+                var prgrammingBooks = new TermQuery(new Term("category", "/technology/computers/programming"));
+                var methodologyBooks =  new TermQuery( new Term("category", "/technology/computers/programming/methodology"));
+                var easternPhilosophyBooks = new TermQuery( new Term("category", "/philosophy/eastern"));
+
+                var topDocsZero = indexSearcher.Search(prgrammingBooks, 10);
+                var topDocsOne = indexSearcher.Search(methodologyBooks, 10);
+                var topDocsTwo = indexSearcher.Search(easternPhilosophyBooks, 10);
+
+
+                var enlightenmentBooks = new BooleanQuery()
+                {
+                    {methodologyBooks, Occur.SHOULD}, 
+                    {easternPhilosophyBooks, Occur.SHOULD}
+                };
+
+                // Search, without subcategories
+                var topDocs = indexSearcher.Search(enlightenmentBooks, 10);
+
+                Assert.True(TestUtils.HitsIncludeTitle(indexSearcher, topDocs, "Extreme Programming Explained"));
+                Assert.True(TestUtils.HitsIncludeTitle(indexSearcher, topDocs, "Tao Te Ching \u9053\u5FB7\u7D93"));
+            }
+
+        }
+    
     }
 }
